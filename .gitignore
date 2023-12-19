@@ -1,4 +1,8 @@
 venv
 .cache
 .cache*
-data/artists/alex_g
+data/artists/*
+# Exclude .png, .jpg, and .jpeg files from being ignored
+!data/artists/**/*.png
+!data/artists/**/*.jpg
+!data/artists/**/*.jpeg
