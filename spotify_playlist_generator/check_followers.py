@@ -11,7 +11,7 @@ client_secret_rg = '9f2d3df22a774b21917a4d230ca5db3e'
 client_id_kk = 'd45115664aa242c2bec6d1427dce642d'
 client_secret_kk = '477c8ec1cd654c178c801fde3fc341aa'
 
-client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+client_credentials_manager = SpotifyClientCredentials(client_id=client_id_rg, client_secret=client_secret_rg)
 
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager, requests_timeout=30, retries=10, status_retries=10, backoff_factor=0.2)
 
@@ -40,7 +40,7 @@ def robust_request(func, *args):
     raise RuntimeError("Failed to connect after multiple attempts")
 
 # Initialize playlist results
-playlists = get_user_playlists(sp, user_id)
+playlists = get_user_playlists(sp, user_id_rg)
 total_playlists = playlists['total']  # Get total number of playlists
 total_followers = 0
 
@@ -48,7 +48,7 @@ pbar = tqdm(total=total_playlists)  # Initialize progress bar
 
 while playlists:
     for playlist in playlists['items']:
-        if playlist['owner']['id'] == user_id:
+        if playlist['owner']['id'] == user_id_rg:
             # Fetch full playlist object to get 'followers' field
             full_playlist = None
             while full_playlist is None:

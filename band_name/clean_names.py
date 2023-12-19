@@ -16,8 +16,8 @@ def process_and_save_names(input_file, output_file):
 
 
 def main():
-    input_filename = "band_name/z_available_names.txt"
-    output_filename = "band_name/z_candidate_names.txt"
+    input_filename = "band_name/data/er_available_names.txt"
+    output_filename = "band_name/data/er_candidate_names.txt"
     process_and_save_names(input_filename, output_filename)
     print(f"Processed names have been saved to {output_filename}.")
 

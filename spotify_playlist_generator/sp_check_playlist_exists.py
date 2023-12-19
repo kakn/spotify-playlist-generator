@@ -5,7 +5,7 @@ import csv
 import requests
 
 def read_results():
-    results = open('result4.json')
+    results = open('data/unreleased/youtube_videos_4.json')
     results_dict = json.load(results)
     results.close()
     return results_dict
@@ -53,7 +53,7 @@ def write_csv(items, filename):
         for item in items: # if indexing, remember to -1 from c, unlike preproc.py
             print("Item {a} of {b} ({g}%)".format(a=c, b=len(items), g=round((c/len(items))*100, 2))) # implement percentages
             exists = playlist_exists(item[0])
-            if exists == False:
+            if not exists:
                 writer.writerow(item)
                 d += 1
                 print("{a} of {b} video titles do not exist as Spotify playlists ({g}%)".format(a=d, b=c, g=round((d/c)*100, 2)))
@@ -62,5 +62,5 @@ def write_csv(items, filename):
 def main():
     results_dict = read_results()
     playlist_item_list = collect_data(results_dict)
-    write_csv(playlist_item_list, "potential_playlists.csv")
-# main()
+    write_csv(playlist_item_list, "data/unreleased/potential_playlists.csv")
+main()

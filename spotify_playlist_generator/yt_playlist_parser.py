@@ -15,10 +15,10 @@ YOUTUBE_API_VERSION = 'v3'
 
 max_results = 50
 # videos = {}
-PROGRESS = 2368
+PROGRESS = 2726
 
 # Uncomment this if I need to continue where I left off
-with open('data/unreleased/youtube_videos_2.json') as json_file:
+with open('data/unreleased/youtube_videos_3.json') as json_file:
     videos = json.load(json_file)
 
 def playlist_parser(playlistId, token, dkey):
@@ -53,7 +53,7 @@ def playlist_parser(playlistId, token, dkey):
 def tryTryAgain(line, i, c, f):
     # function that rotates developer keys to bypass google api quotas
     if i == 5:
-         with open('data/unreleased/youtube_videos_3.json', 'w') as fp:
+         with open('data/unreleased/youtube_videos_4.json', 'w') as fp:
                 print("Final number of songs: {a}".format(a=len(videos)))
                 json.dump(videos, fp)
                 quit()
@@ -69,7 +69,7 @@ def tryTryAgain(line, i, c, f):
         else:
             print(f"Unknown error: {h}")
     except Exception as e:
-        with open('data/unreleased/youtube_videos_3.json', 'w') as fp:
+        with open('data/unreleased/youtube_videos_4.json', 'w') as fp:
             print(f"Raised error: {e}")
             print("Final number of songs: {a}".format(a=len(videos)))
             json.dump(videos, fp)
@@ -82,14 +82,14 @@ def main():
         line = line.strip() 
         tryTryAgain(line, 0, c, f)
         c += 1
-    with open('data/unreleased/youtube_videos_3.json', 'w') as fp:
+    with open('data/unreleased/youtube_videos_4.json', 'w') as fp:
         json.dump(videos, fp)
     f.close()
 
 try:
     main()
 except Exception as e:
-    with open('data/unreleased/youtube_videos_3.json', 'w') as fp:
+    with open('data/unreleased/youtube_videos_4.json', 'w') as fp:
         print(f"Raised error: {e}")
         print("Final number of songs: {a}".format(a=len(videos)))
         json.dump(videos, fp)

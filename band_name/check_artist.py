@@ -51,7 +51,7 @@ def is_artist_on_spotify(artist_name, token):
 
     # If we've retried MAX_RETRIES times and still have an error, 
     # consider the name as unchecked and write it to a separate file.
-    with open('band_name/unchecked_names.txt', 'a') as unchecked_file:
+    with open('band_name/data/unchecked_names.txt', 'a') as unchecked_file:
         unchecked_file.write(artist_name + '\n')
 
     return False
@@ -62,7 +62,7 @@ def check_artists_in_file(file_path):
         print("Couldn't get Spotify token.")
         return
 
-    with open(file_path, 'r') as file, open('band_name/z_available_names.txt', 'a') as output_file:
+    with open(file_path, 'r') as file, open('band_name/data/er_available_names.txt', 'a') as output_file:
         lines = file.readlines()
         for line in tqdm(lines, desc="Checking names", unit="name"):
             artist_name = line.strip()
@@ -74,4 +74,4 @@ def main(filepath):
     check_artists_in_file(filepath)
 
 if __name__ == "__main__":
-    main("band_name/z_generated_words.txt")
+    main("band_name/data/er_generated_words.txt")
