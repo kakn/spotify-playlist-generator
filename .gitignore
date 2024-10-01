@@ -1,10 +1,4 @@
-venv
-.cache
-.cache*
-
-# Ignore everything in the data/artists directory
-data/artists/*/*/*
-# Exclude .png, .jpg, and .jpeg files from being ignored
-!data/artists/**/*.png
-!data/artists/**/*.jpg
-!data/artists/**/*.jpeg
+legacy/
+venv/
+data/spotify_data/*/
+*__pycache__/
