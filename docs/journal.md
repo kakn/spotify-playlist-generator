@@ -21,3 +21,21 @@
     - Maybe make a recursive implementation that starts with pop, collects all related genres, and so forth.
 - Maybe the genre approach is too extensive. There are probably like 10,000 different genres. 
     - With 1 thousand artists in each genre??? 10 million artists to search for???
+- Can't actually directly search for playlists by name. It looks at all metadata. I have made a request-heavy implementation to fix this
+    - This does not bode well for when checking if a playlist exists by name later in the pipeline.
+- Can check if song "is on streaming services" by seeing if the song in the YouTube playlist is posted by the official channel.
+    - Furthermore, can validate this / nullify this if the "official song" is found later in the same or one of the other 2 playlists we look at on YouTube.
+- Should use the full list of artists (_other_), as they likely have a higher concentration of unreleased music. Could maybe just scrape the internet for unreleased artists.
+    - Should not have a limit when counting playlists
+    - Get more API keys to rotate. Should be logging changing them
+    - Should prioritize followers, not the genre of playlists.
+### Analyzing artists that have unreleased music
+- Sort new CSV by number of unreleased playlists, then followers
+- Collect images that fit in Spotify playlist dimension
+- Identify if scraped YouTube channel has "- Topic" in the name, this may imply the music is available on Spotify
+- Create reliable RegEx scheme for cleaning YouTube videos. 
+    - If the video has "Lyrics" in the name, might be best to use non-thumbnail as Spotify picture.
+- Fuck, I may need a better Spotify playlist collection scheme. Name cannot be a part of a word, i.e. "Dio" has 11 playlists, but this could be "Celine Dion"
+    - Use Unidecode
+    - Perhaps also normalize "$", like in A$AP or $uicideBoy$
+    - Also use lower case when trying to match, i.e. "unreleased alex g"

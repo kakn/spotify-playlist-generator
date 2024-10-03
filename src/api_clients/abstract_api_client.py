@@ -39,6 +39,7 @@ class AbstractAPIClient(ABC):
         return self.api_keys[self.current_key_index]
 
     def _rotate_api_key(self):
+        print("Rotating API key")
         self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
 
     @abstractmethod

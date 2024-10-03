@@ -183,3 +183,118 @@ class SpotifyAPIClient(AbstractAPIClient):
             genres = ast.literal_eval(genres_str)
             all_genres.update(genres)
         return all_genres
+
+    def find_unreleased_playlists(self, input_csv: str, output_csv: str) -> None:
+        """
+        Reads artists from input_csv, searches for playlists titled "unreleased [artist name]",
+        and writes to output_csv with added columns for the count of such playlists and their IDs.
+        Processes all artists, including those with zero unreleased playlists.
+        """
+        if os.path.exists(output_csv):
+            processed_df = pd.read_csv(output_csv)
+            processed_artists = set(processed_df['id'])
+            mode = 'a'  # Append mode
+            header = False
+        else:
+            processed_df = pd.DataFrame()
+            processed_artists = set()
+            mode = 'w'  # Write mode
+            header = True
+
+        df = pd.read_csv(input_csv)
+        df = df[df['followers'] >= 100000]
+        total_artists = len(df)
+        skipped_artists = []
+
+        output_columns = df.columns.tolist()
+        output_columns.insert(1, 'unreleased_playlists_count')
+        output_columns.append('unreleased_playlists_ids')
+        
+        with open(output_csv, mode, newline='', encoding='utf-8') as f_out:
+            pbar = tqdm(total=total_artists, initial=len(processed_artists), desc="Processing Artists")
+
+            for _, row in df.iterrows():
+                artist_id = row['id']
+                artist_name = row['name']
+
+                if artist_id in processed_artists:
+                    pbar.update(1)
+                    continue
+
+                try:
+                    count, playlist_ids = self._count_playlists_with_terms_in_title(artist_name)
+                    row_data = row.tolist()
+                    row_data.insert(1, count)
+                    row_data.append(str(playlist_ids))
+                    pd.DataFrame([row_data], columns=output_columns).to_csv(f_out, header=header, index=False)
+                    header = False
+
+                except Exception as e:
+                    if self._should_rotate(e):
+                        self._rotate_api_key()
+                        continue
+                    else:
+                        skipped_artists.append(artist_name)
+                finally:
+                    processed_artists.add(artist_id)
+                    pbar.update(1)
+
+            pbar.close()
+
+            if skipped_artists:
+                print(f"Skipped artists due to errors: {skipped_artists}")
+
+    def _count_playlists_with_terms_in_title(self, artist_name: str) -> Tuple[int, List[str]]:
+        """
+        Searches for playlists containing 'unreleased' and the artist's name,
+        and returns the count and list of unique playlist IDs that have both terms in the playlist title.
+        """
+        query = f'unreleased {artist_name}'
+        limit = 50  # Number of playlists to fetch per request
+        offset = 0
+        total_exact_matches = 0
+        playlist_ids = []
+
+        max_offset = 10000  # Spotify API maximum offset limit
+        while offset < max_offset:
+            response = self._get_current_key().search(q=query, type='playlist', limit=limit, offset=offset)
+            playlists = response['playlists']['items']
+
+            if not playlists:
+                break  # No more playlists to fetch
+
+            for playlist in playlists:
+                playlist_name = playlist['name'].lower()
+                if 'unreleased' in playlist_name and artist_name.lower() in playlist_name:
+                    total_exact_matches += 1
+                    playlist_ids.append(playlist['id'])
+
+            if len(playlists) < limit:
+                break  # Reached the end of results
+
+            offset += limit
+
+        # Remove duplicates
+        playlist_ids = list(set(playlist_ids))
+
+        return total_exact_matches, playlist_ids
+
+    @staticmethod
+    def sort_csv_by_followers(input_csv: str) -> None:
+        """
+        Reads the CSV file, swaps 'followers' and 'popularity' columns, 
+        sorts the DataFrame by the 'followers' column in descending order,
+        and writes the sorted DataFrame to a new CSV file.
+        """
+        df = pd.read_csv(input_csv)
+
+        cols = df.columns.tolist()
+        idx_popularity = cols.index('popularity')
+        idx_followers = cols.index('followers')
+
+        cols[idx_followers], cols[idx_popularity] = cols[idx_popularity], cols[idx_followers]
+        df = df[cols]
+
+        df_sorted = df.sort_values(by='followers', ascending=False)
+        df_sorted.to_csv(input_csv, index=False)
+        print(f"Sorted CSV saved to {input_csv}")
