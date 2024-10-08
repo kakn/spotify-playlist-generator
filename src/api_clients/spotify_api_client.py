@@ -1,12 +1,13 @@
 import ast
 import os
 import re
-from typing import Any, Dict, List, Tuple, Set
+from typing import Any, Dict, List, Set, Tuple
 
 import pandas as pd
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from tqdm import tqdm
+from unidecode import unidecode
 
 from src.api_clients.abstract_api_client import AbstractAPIClient
 
@@ -186,9 +187,9 @@ class SpotifyAPIClient(AbstractAPIClient):
 
     def find_unreleased_playlists(self, input_csv: str, output_csv: str) -> None:
         """
-        Reads artists from input_csv, searches for playlists titled "unreleased [artist name]",
+        Reads artists from input_csv, adds an 'alias' column using unidecode,
+        searches for playlists titled "unreleased [artist name]" or "unreleased [alias]",
         and writes to output_csv with added columns for the count of such playlists and their IDs.
-        Processes all artists, including those with zero unreleased playlists.
         """
         if os.path.exists(output_csv):
             processed_df = pd.read_csv(output_csv)
@@ -203,28 +204,32 @@ class SpotifyAPIClient(AbstractAPIClient):
 
         df = pd.read_csv(input_csv)
         df = df[df['followers'] >= 100000]
+        df.insert(1, 'alias', df['name'].apply(
+            lambda x: unidecode(x) if unidecode(x).lower() != x.lower() else ''
+        ))
         total_artists = len(df)
         skipped_artists = []
 
         output_columns = df.columns.tolist()
-        output_columns.insert(1, 'unreleased_playlists_count')
+        output_columns.insert(2, 'unreleased_playlists_count')
         output_columns.append('unreleased_playlists_ids')
-        
+
         with open(output_csv, mode, newline='', encoding='utf-8') as f_out:
             pbar = tqdm(total=total_artists, initial=len(processed_artists), desc="Processing Artists")
 
             for _, row in df.iterrows():
                 artist_id = row['id']
                 artist_name = row['name']
+                alias = row['alias']
 
                 if artist_id in processed_artists:
                     pbar.update(1)
                     continue
 
                 try:
-                    count, playlist_ids = self._count_playlists_with_terms_in_title(artist_name)
+                    count, playlist_ids = self._count_playlists_with_terms_in_title(artist_name, alias)
                     row_data = row.tolist()
-                    row_data.insert(1, count)
+                    row_data.insert(2, count)
                     row_data.append(str(playlist_ids))
                     pd.DataFrame([row_data], columns=output_columns).to_csv(f_out, header=header, index=False)
                     header = False
@@ -244,38 +249,41 @@ class SpotifyAPIClient(AbstractAPIClient):
             if skipped_artists:
                 print(f"Skipped artists due to errors: {skipped_artists}")
 
-    def _count_playlists_with_terms_in_title(self, artist_name: str) -> Tuple[int, List[str]]:
+    def _count_playlists_with_terms_in_title(self, artist_name: str, alias: str) -> Tuple[int, List[str]]:
         """
-        Searches for playlists containing 'unreleased' and the artist's name,
-        and returns the count and list of unique playlist IDs that have both terms in the playlist title.
+        Searches for playlists containing 'unreleased' and the artist's name or alias as whole words (case-insensitive),
+        and returns the count and list of unique playlist IDs that match the criteria.
         """
-        query = f'unreleased {artist_name}'
         limit = 50  # Number of playlists to fetch per request
-        offset = 0
-        total_exact_matches = 0
-        playlist_ids = []
-
         max_offset = 10000  # Spotify API maximum offset limit
-        while offset < max_offset:
-            response = self._get_current_key().search(q=query, type='playlist', limit=limit, offset=offset)
-            playlists = response['playlists']['items']
+        playlist_ids = set()
+        queries = [f'unreleased {artist_name}']
+        if alias and alias.lower() != artist_name.lower():
+            queries.append(f'unreleased {alias}')
 
-            if not playlists:
-                break  # No more playlists to fetch
+        for query in queries:
+            offset = 0
+            while offset < max_offset:
+                response = self._get_current_key().search(q=query, type='playlist', limit=limit, offset=offset)
+                playlists = response['playlists']['items']
 
-            for playlist in playlists:
-                playlist_name = playlist['name'].lower()
-                if 'unreleased' in playlist_name and artist_name.lower() in playlist_name:
-                    total_exact_matches += 1
-                    playlist_ids.append(playlist['id'])
+                if not playlists:
+                    break
 
-            if len(playlists) < limit:
-                break  # Reached the end of results
+                for playlist in playlists:
+                    playlist_name = playlist['name'].lower()
+                    if (re.search(r'\bunreleased\b', playlist_name) and
+                        (re.search(rf'\b{re.escape(artist_name.lower())}\b', playlist_name) or
+                        (alias and re.search(rf'\b{re.escape(alias.lower())}\b', playlist_name)))):
+                        playlist_ids.add(playlist['id'])
 
-            offset += limit
+                if len(playlists) < limit:
+                    break  # Reached the end of results
 
-        # Remove duplicates
-        playlist_ids = list(set(playlist_ids))
+                offset += limit
+
+        total_exact_matches = len(playlist_ids)
+        playlist_ids = list(playlist_ids)
 
         return total_exact_matches, playlist_ids
 
@@ -298,3 +306,31 @@ class SpotifyAPIClient(AbstractAPIClient):
         df_sorted = df.sort_values(by='followers', ascending=False)
         df_sorted.to_csv(input_csv, index=False)
         print(f"Sorted CSV saved to {input_csv}")
+
+    @staticmethod
+    def get_non_alphanumeric_names(csv_file: str) -> List[str]:
+        """
+        Reads the CSV file and returns a list of names that contain non-alphanumeric characters
+        for artists with 100,000 or more followers, maintaining the original order of the CSV.
+
+        Args:
+            csv_file (str): Path to the CSV file.
+
+        Returns:
+            List[str]: A list of names containing non-alphanumeric characters, in original CSV order.
+        """
+        df = pd.read_csv(csv_file)
+        
+        def contains_non_alphanumeric(name: str) -> bool:
+            return bool(re.search(r'[^a-zA-Z0-9\s]', name))
+
+        # Filter for artists with 100,000 or more followers
+        df_filtered = df[df['followers'] >= 100000]
+
+        # Create a boolean mask for non-alphanumeric names
+        non_alphanumeric_mask = df_filtered['name'].apply(contains_non_alphanumeric)
+
+        # Apply the mask and get the names, maintaining the original order
+        non_alphanumeric_names = df_filtered.loc[non_alphanumeric_mask, 'name'].tolist()
+
+        return non_alphanumeric_names

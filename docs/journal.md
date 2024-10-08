@@ -39,3 +39,14 @@
     - Use Unidecode
     - Perhaps also normalize "$", like in A$AP or $uicideBoy$
     - Also use lower case when trying to match, i.e. "unreleased alex g"
+- Need better pattern matching than solely relying on unidecode to make aliases. What about "J. Cole" and "Guns N' Roses"
+    - Replace hyphen, comma, with a space
+    - Replace dot, apostrophe with empty character // Potentially also with a space, as an alter-alias
+    - Replace $ with S, & with "and"
+    - Is "Tyler the Creator" always better than matching "Tyler, the Creator"?
+    - Clear whitespace
+    - Potentially remove all "!", "?", "*", other random shit like the bullet point
+    - Perhaps I can use the query Spotify thing to help (from StackOverflow):
+        - Something you could try is to use the advanced query syntax offered by Spotify search, and only search for part of the song title/artist name. 
+        - For example your query for "Fascination" from "Jane Morgan And The Troubadors" could become: artist:"Jane Mo" track:"Fascin"
+    - 
