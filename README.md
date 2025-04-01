@@ -1,5 +1,5 @@
 # spotify-playlist-generator
-A Python-based tool that automates the creation of Spotify playlists marked as “unreleased,” with the goal of appearing in user-generated search results. By gathering YouTube playlist data for unreleased music, checking track availability on Spotify, and programmatically creating new playlists for any missing music, it aims to provide a free, automated way to boost artist visibility.
+A Python-based tool that automates the creation of Spotify playlists marked as “unreleased,” with the goal of appearing in user-generated search results. By gathering YouTube playlist data for unreleased music, checking track availability on Spotify, and programmatically creating new playlists for any missing music, it aims to provide a creative, free alternative to paid playlist placements, letting you include your own music, or tracks from friends and independent artists, in playlists that gain visibility through searches for unreleased songs.
 
 ## How it works
 - YouTube Scraping: Collects playlists and track details for “unreleased” music.
