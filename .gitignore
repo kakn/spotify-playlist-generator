@@ -1,4 +1,4 @@
-legacy/
 venv/
 data/spotify_data/*/
 *__pycache__/
+.DS_Store
