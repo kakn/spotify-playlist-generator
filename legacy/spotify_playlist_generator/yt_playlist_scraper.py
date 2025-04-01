@@ -4,7 +4,7 @@ from googleapiclient.errors import HttpError
 # Needs a bit of a clean. not too much though
 # Rotate keys
 
-DEVELOPER_KEY = "AIzaSyD2TkXrmCpr1pNB2-UnnZWkW7uN-cPhaxA"
+DEVELOPER_KEY = "===REDACTED==="
 YOUTUBE_API_SERVICE_NAME = 'youtube'
 YOUTUBE_API_VERSION = 'v3'
 

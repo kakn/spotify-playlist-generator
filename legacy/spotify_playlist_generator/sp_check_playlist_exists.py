@@ -28,8 +28,8 @@ def collect_data(results_dict):
 
 def playlist_exists(playlist_title):
     # Set up Spotify API client
-    client_credentials_manager = SpotifyClientCredentials(client_id='68638f90ae504fc7b4e57953c72bf302',
-                                                          client_secret='0c25a7ea73f2472986dde61c27fc1f57')
+    client_credentials_manager = SpotifyClientCredentials(client_id='===REDACTED===',
+                                                          client_secret='===REDACTED===')
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
     # Search for playlists with the given title
     try:

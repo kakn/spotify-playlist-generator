@@ -10,11 +10,11 @@ import sys
 # Except 403 error (quota) and 404 (no playlist) and others (idk)
 # Have fuck tons of backups on errors
 
-kasperknudsen = "AIzaSyDsBUi46WUCuKXUK2H2o7Tq46w7fzourWY"
-kasperknudsen85 = "AIzaSyDp2PrAP-J2uiNVo-VvbdTvyC4r5T-NwhQ"
-thomasgartside = "AIzaSyADaY7aWvMpHOGxBsQTgT2bMsCAO5uQgrM"
-rigbyroo = "AIzaSyB412Mwe0cWU0lOq3W7XG0b_4N6GyQfT_8"
-rigbytf = "AIzaSyD2TkXrmCpr1pNB2-UnnZWkW7uN-cPhaxA"
+kasperknudsen = "===REDACTED==="
+kasperknudsen85 = "===REDACTED===-NwhQ"
+thomasgartside = "===REDACTED==="
+rigbyroo = "===REDACTED==="
+rigbytf = "===REDACTED==="
 devs = [kasperknudsen, kasperknudsen85, thomasgartside, rigbyroo, rigbytf]
 
 # DEVELOPER_KEY = kasperknudsen

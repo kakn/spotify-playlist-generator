@@ -4,11 +4,11 @@ import csv
 import openai
 import time
 
-outlook = "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"
-kasperknudsen85 = "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"
-rigbytf = "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"
-rigbyroo = "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"
-mia = "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"
+outlook = "===REDACTED==="
+kasperknudsen85 = "===REDACTED==="
+rigbytf = "===REDACTED==="
+rigbyroo = "===REDACTED==="
+mia = "===REDACTED==="
 API_KEYS = [outlook, kasperknudsen85, rigbytf, rigbyroo, mia]
 
 def read_results():

@@ -152,10 +152,10 @@ def create_playlist_from_csv(file_path, spotify_api_details, openai_api_key):
                 logging.error(f"Error occurred while creating playlist for the video title '{video_title}': {str(e)}")
 
 spotify_api_details = {
-    'client_id': '749cacc699c44f3ca7d3a9048f5cfb75',
-    'client_secret': '9f2d3df22a774b21917a4d230ca5db3e'
+    'client_id': '===REDACTED===',
+    'client_secret': '===REDACTED==='
 }
 
-openai_api_key = "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"
+openai_api_key = "===REDACTED==="
 
 create_playlist_from_csv('data/updated_candidates.csv', spotify_api_details, openai_api_key)
